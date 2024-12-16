@@ -2,12 +2,13 @@ import React, {useEffect, useState, useCallback} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, FlatList, Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {getDatabase, ref, onValue, query, orderByChild} from 'firebase/database';
-import {getAuth} from 'firebase/auth';
+import {auth} from "../firebaseConfig";
 
 export default function HomePage() {
     const navigation = useNavigation();
     const [combinedChats, setCombinedChats] = useState([]);
-    const currentUser = getAuth().currentUser;
+    const currentUser  = auth.currentUser
+
 
     // Unified function to fetch and update chats and groups with real-time listening
     const fetchAndListenToChatsAndGroups = useCallback(() => {
@@ -45,7 +46,6 @@ export default function HomePage() {
                                     a.timestamp > b.timestamp ? a : b
                                 )
                                 : null;
-                            console.log("last messgaes", lastMessage)
                             // Get contact pseudo or use a fallback
                             const contactPseudo = contactsData[otherUserId]?.pseudo || 'Unknown User';
 
@@ -102,7 +102,6 @@ export default function HomePage() {
                         });
                         const combinedData = [...chatsArray, ...groupsArray]
                             .sort((a, b) => b.timestamp - a.timestamp);
-                        console.log("combinedData", chatsArray)
 
                         setCombinedChats(combinedData);
                     });
@@ -117,7 +116,7 @@ export default function HomePage() {
 
     const handleChatClick = (item) => {
         if (item.isGroup) {
-            navigation.navigate('GroupChatScreen', {
+            navigation.navigate('ChatScreenGroup', {
                 groupId: item.id,
                 name: item.name,
             });

@@ -12,7 +12,61 @@ import { getDatabase, ref, onValue, set, get } from "firebase/database";
 import { auth } from "../firebaseConfig";
 import { MaterialIcons } from '@expo/vector-icons';
 import { Searchbar } from 'react-native-paper';
+const useGroupsWithOnlineStatus = (currentUserId) => {
+    const [groups, setGroups] = useState([]);
+    const db = getDatabase();
 
+    useEffect(() => {
+        // Reference to groups
+        const groupsRef = ref(db, 'groups');
+
+        // Function to check if any group member is online
+        const checkGroupOnlineStatus = async (members) => {
+            for (const memberId of members) {
+                const memberRef = ref(db, `users/${memberId}/online`);
+                const memberSnapshot = await get(memberRef);
+                if (memberSnapshot.exists() && memberSnapshot.val() === true) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Real-time listener for groups
+        const unsubscribeGroups = onValue(groupsRef, async (snapshot) => {
+            if (snapshot.exists()) {
+                const groupsData = snapshot.val();
+
+                // Process groups
+                const processedGroups = await Promise.all(
+                    Object.entries(groupsData)
+                        .filter(([groupId, groupInfo]) =>
+                            Object.keys(groupInfo.members || {}).includes(currentUserId)
+                        )
+                        .map(async ([groupId, groupInfo]) => {
+                            const memberIds = Object.keys(groupInfo.members || {});
+
+                            return {
+                                id: groupId,
+                                name: groupInfo.name,
+                                members: memberIds,
+                                online: await checkGroupOnlineStatus(memberIds)
+                            };
+                        })
+                );
+
+                setGroups(processedGroups);
+            } else {
+                setGroups([]);
+            }
+        });
+
+        // Cleanup subscription on unmount
+        return () => unsubscribeGroups();
+    }, [currentUserId, db]);
+
+    return groups;
+};
 export default function ContactsScreen() {
     const navigation = useNavigation();
     const [contacts, setContacts] = useState([]);
@@ -76,35 +130,48 @@ export default function ContactsScreen() {
             });
 
             // Fetch group data
-            const unsubscribeGroups = onValue(groupsRef, (snapshot) => {
+            const checkGroupOnlineStatus = async (members) => {
+                for (const memberId of members) {
+                    const memberRef = ref(db, `users/${memberId}/online`);
+
+                    // Return true if any member is online
+                    const memberSnapshot = await get(memberRef);
+                    if (memberSnapshot.exists() && memberSnapshot.val() === true) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            // Real-time listener for groups
+            const unsubscribeGroups = onValue(groupsRef, async (snapshot) => {
                 if (snapshot.exists()) {
                     const groupsData = snapshot.val();
-                    const updatedGroups = Object.entries(groupsData).map(([groupId, groupInfo]) => {
-                        const members = Object.keys(groupInfo.members || {});
-                        const online = members.some((memberId) => {
-                            const memberRef = ref(db, `users/${memberId}/online`);
-                            let memberOnline = false;
-                            onValue(memberRef, (memberSnapshot) => {
-                                if (memberSnapshot.exists()) {
-                                    memberOnline = memberSnapshot.val();
-                                }
-                            });
-                            return memberOnline;
-                        });
-                        return {
-                            id: groupId,
-                            name: groupInfo.name,
-                            members: groupInfo.members,
-                            online,
-                        };
-                    });
-                    setGroups(updatedGroups);
+console.log("groupData",groupsData)
+                    // Process groups
+                    const processedGroups = await Promise.all(
+                        Object.entries(groupsData)
+                            .filter(([groupId, groupInfo]) =>
+                                // Check if current user is in the members array
+                                groupInfo.members && groupInfo.members.includes(currentUserId)
+                            )
+                            .map(async ([groupId, groupInfo]) => {
+                                return {
+                                    id: groupId,
+                                    name: groupInfo.name,
+                                    members: groupInfo.members,
+                                    createdAt: groupInfo.createdAt,
+                                    createdBy: groupInfo.createdBy,
+                                    online: await checkGroupOnlineStatus(groupInfo.members)
+                                };
+                            })
+                    );
+
+                    setGroups(processedGroups);
                 } else {
                     setGroups([]);
                 }
-            });
-
-            return () => {
+            });            return () => {
                 unsubscribeContacts();
                 unsubscribeGroups();
                 contactListeners.forEach((unsubscribe) => unsubscribe());
