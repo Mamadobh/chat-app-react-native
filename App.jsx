@@ -15,6 +15,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import CreateGroupScreen from "./screens/CreateGroupScreen";
 import ChatScreenGroup from "./screens/ChatScreenGroup";
+import ProfileScreen from "./screens/ProfileScreen";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 function MainTabs() {
@@ -42,7 +43,7 @@ function MainTabs() {
               iconName = focused ? "people" : "people-outline";
             } else if (route.name === "Groups") {
               iconName = focused ? "albums" : "albums-outline";
-            } else if (route.name === "Settings") {
+            } else if (route.name === "ProfileScreen") {
               iconName = focused ? "settings" : "settings-outline";
             }
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -53,7 +54,7 @@ function MainTabs() {
         <Tab.Screen name="Home" component={HomePage} />
         <Tab.Screen name="Contacts" component={ContactsScreen} />
         {/*<Tab.Screen name="Groups" component={GroupsScreen} />*/}
-        <Tab.Screen name="Settings" component={ProfileSettings} />
+        <Tab.Screen name="ProfileScreen" component={ProfileScreen} />
       </Tab.Navigator>
     </>
   );
@@ -78,6 +79,8 @@ function AppNavigator() {
               <Stack.Screen name="AddContact" component={AddContactScreen} />
               <Stack.Screen name="CreateGroupScreen" component={CreateGroupScreen} />
               <Stack.Screen name="ChatScreenGroup" component={ChatScreenGroup} />
+              <Tab.Screen name="ProfileSettings" component={ProfileSettings} />
+
 
           </>
         ) : (
