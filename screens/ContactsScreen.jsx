@@ -147,7 +147,7 @@ export default function ContactsScreen() {
             const unsubscribeGroups = onValue(groupsRef, async (snapshot) => {
                 if (snapshot.exists()) {
                     const groupsData = snapshot.val();
-console.log("groupData",groupsData)
+                    console.log("groupData",groupsData)
                     // Process groups
                     const processedGroups = await Promise.all(
                         Object.entries(groupsData)
@@ -183,7 +183,7 @@ console.log("groupData",groupsData)
         setLoading(false);
 
         return cleanup;
-    }, []);
+    }, [contacts.length]);
 
     // Enhanced search filtering
     const filteredContacts = useMemo(() => {
@@ -286,28 +286,30 @@ console.log("groupData",groupsData)
             {filteredGroups.length > 0 && (
                 <>
                     <Text style={styles.sectionHeader}>Groups</Text>
-                    <FlatList
-                        data={filteredGroups}
-                        renderItem={({item}) => (
-                            <TouchableOpacity onPress={() => handleChatClickGroup(item.id, item.name, item.members)}>
-                                <View style={styles.contactItem}>
-                                    <View style={styles.avatarPlaceholder}>
-                                        <Text style={styles.avatarInitial}>{item.name[0]}</Text>
+                    <View>
+                        <FlatList
+                            data={filteredGroups}
+                            renderItem={({item}) => (
+                                <TouchableOpacity onPress={() => handleChatClickGroup(item.id, item.name, item.members)}>
+                                    <View style={styles.contactItem}>
+                                        <View style={styles.avatarPlaceholder}>
+                                            <Text style={styles.avatarInitial}>{item.name[0]}</Text>
+                                        </View>
+                                        <View style={styles.contactDetails}>
+                                            <Text style={styles.contactName}>{item.name}</Text>
+                                            <Text style={styles.contactEmail}>Group</Text>
+                                        </View>
+                                        {item.online ? <View style={styles.onlineIndicator}/> :
+                                            <View style={styles.oflineIndicator}/>}
                                     </View>
-                                    <View style={styles.contactDetails}>
-                                        <Text style={styles.contactName}>{item.name}</Text>
-                                        <Text style={styles.contactEmail}>Group</Text>
-                                    </View>
-                                    {item.online ? <View style={styles.onlineIndicator}/> :
-                                        <View style={styles.oflineIndicator}/>}
-                                </View>
-                            </TouchableOpacity>
-                        )}
-                        keyExtractor={(item) => `group_${item.id}`}
-                        ListEmptyComponent={
-                            <Text style={styles.emptyListText}>No groups found</Text>
-                        }
-                    />
+                                </TouchableOpacity>
+                            )}
+                            keyExtractor={(item) => `group_${item.id}`}
+                            ListEmptyComponent={
+                                <Text style={styles.emptyListText}>No groups found</Text>
+                            }
+                        />
+                    </View>
                 </>
             )}
 

@@ -29,7 +29,7 @@ export default function HomePage() {
     const db = getDatabase();
     const chatsRef = ref(db, "chats");
     const groupsRef = ref(db, "groups");
-    const usersRef = ref(db, users/${currentUser.uid}/contactList);
+    const usersRef = ref(db, `users/${currentUser.uid}/contactList`);
     let chatsArray =
       // Fetch contacts first
       onValue(usersRef, (contactSnapshot) => {
@@ -85,7 +85,7 @@ export default function HomePage() {
               // Check if current user is a group member
               if (group.members?.includes(currentUser.uid)) {
                 // Find the group's messages
-                const groupChatsRef = ref(db, chats/${groupId}__/messages);
+                const groupChatsRef = ref(db, `chats/${groupId}__/messages`);
 
                 onValue(groupChatsRef, (groupMessagesSnapshot) => {
                   const groupMessagesArray = [];

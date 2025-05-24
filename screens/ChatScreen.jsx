@@ -142,7 +142,7 @@ export default function ChatScreen({ route }) {
 
       // Construct the new message object
       const newMessageData = {
-        senderId: currentUserId,
+        sender: currentUserId,
         text: newMessage.trim(),
         timestamp: Date.now(),
         file: fileUrl
@@ -376,7 +376,7 @@ export default function ChatScreen({ route }) {
       const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
       const newMessage = {
-        senderId: currentUserId,
+        sender: currentUserId,
         text: `🗺️ Location: ${locationUrl}`,
         timestamp: Date.now(),
         file: null,
@@ -462,7 +462,9 @@ export default function ChatScreen({ route }) {
         )}
         keyExtractor={(item) => item.id}
       />
-      {otherIsTyping && <Text> is Typing ...</Text>}
+      {otherIsTyping && (
+        <Text style={styles.typingIndicator}>{name} is typing...</Text>
+      )}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -637,5 +639,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  typingIndicator: {
+    textAlign: "center",
+    color: "#777",
+    padding: 5,
   },
 });

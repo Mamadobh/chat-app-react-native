@@ -189,7 +189,7 @@ export default function ChatScreenGroup({route}) {
                                     })}
                                 </Text>
                             </TouchableOpacity>
-                            {(item.sender !== currentUserId && selectedMessage===item) && (
+                            {(item.sender !== currentUserId ) && (
                                 <Text style={styles.senderIndicator}>
                                     Sent by {senderName}
                                 </Text>
